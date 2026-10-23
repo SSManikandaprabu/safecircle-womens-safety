@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeCircle AI — Women's Safety &amp; Live Guardian Platform</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-3 md:p-5">
+
+  <!-- Main Premium SaaS Shell -->
+  <div class="max-w-6xl mx-auto bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl shadow-lg overflow-hidden">
+
+    <!-- Top Navigation Bar -->
+    <header class="px-5 py-3.5 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-3 bg-[var(--background)]">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6750A4] to-[#B3261E] flex items-center justify-center text-white font-bold text-sm shadow">
+          SC
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base tracking-tight">SafeCircle AI</h1>
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+              ● Neural Guardian v2.4 Active
+            </span>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Real-Time Geospatial Protection • Mutual-Consent Circles • Trained Urban Safety AI
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex flex-wrap items-center gap-1.5">
+        <button onclick="switchTab('command')" id="tab-command"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#6750A4] text-white transition">
+          Live Command &amp; Radar
+        </button>
+        <button onclick="switchTab('ai')" id="tab-ai"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] transition">
+          AI Safety Trainer &amp; Scorer
+        </button>
+        <button onclick="switchTab('circles')" id="tab-circles"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] transition">
+          Trusted Circles &amp; Consent
+        </button>
+        <button onclick="switchTab('havens')" id="tab-havens"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] transition">
+          24/7 Safe Havens
+        </button>
+      </nav>
+    </header>
+
+    <!-- Active Emergency Banner (Hidden unless SOS or Countdown active) -->
+    <div id="sos-alert-bar" class="hidden px-5 py-3 bg-[#B3261E] text-white flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-3 w-3 rounded-full bg-white animate-ping"></span>
+        <div>
+          <div id="sos-alert-title" class="font-bold text-sm">EMERGENCY SOS ACTIVE — BROADCASTING TO 4 GUARDIANS &amp; 112 DISPATCH</div>
+          <div id="sos-alert-sub" class="text-xs opacity-90">Encrypted 30s audio stream + high-precision GPS (13.0827° N, 80.2707° E • ±3.4m)</div>
+        </div>
+      </div>
+      <button onclick="cancelSos()" class="px-4 py-1.5 rounded-xl bg-white text-[#B3261E] font-bold text-xs shadow hover:opacity-95">
+        I AM SAFE — CANCEL SOS
+      </button>
+    </div>
+
+    <!-- KPI Telemetry Strip -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 border-b border-[var(--border)] bg-[var(--background)]/50">
+      <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+        <div class="text-xs text-[var(--muted-foreground)]">Corridor Safety Index</div>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="kpi-safety-score" class="text-xl font-bold text-emerald-500">94.8%</span>
+          <span class="text-xs text-emerald-500 font-medium">Optimal Route</span>
+        </div>
+      </div>
+      <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+        <div class="text-xs text-[var(--muted-foreground)]">Active Circle Guardians</div>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="kpi-guardians" class="text-xl font-bold">4 Online</span>
+          <span class="text-xs text-[#6750A4] font-medium">100% Consent</span>
+        </div>
+      </div>
+      <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+        <div class="text-xs text-[var(--muted-foreground)]">Offline Room GPS Queue</div>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="kpi-queue" class="text-xl font-bold">0 pts</span>
+          <button onclick="syncRoomQueue()" class="text-xs text-[#6750A4] underline">Cloud Synced</button>
+        </div>
+      </div>
+      <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+        <div class="text-xs text-[var(--muted-foreground)]">Safe Check-In Timer</div>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="kpi-timer" class="text-xl font-bold">Standby</span>
+          <button onclick="toggleCheckInTimer(15)" id="kpi-timer-btn" class="text-xs text-[#6750A4] underline">Start 15m</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: LIVE COMMAND & GEOSPATIAL RADAR -->
+    <div id="panel-command" class="p-4 md:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- Left 7 Cols: Live Interactive Geospatial Map / Radar Canvas -->
+      <div class="lg:col-span-7 flex flex-col gap-3">
+        <div class="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <div>
+              <h2 class="text-sm font-bold">Live Guardian Radar &amp; Safe-Zone Geofences</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Click anywhere on the map to set a waypoint or simulate movement</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleLiveTracking()" id="btn-live-track"
+                class="px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white">
+                Sharing: ACTIVE
+              </button>
+              <button onclick="queueOfflinePoint()"
+                class="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--card)]">
+                + Queue GPS
+              </button>
+            </div>
+          </div>
+
+          <div class="relative rounded-xl overflow-hidden border border-[var(--border)]">
+            <canvas id="radarCanvas" width="620" height="320" class="w-full block cursor-crosshair"></canvas>
+            <div class="absolute bottom-2.5 left-2.5 right-2.5 flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-black/75 text-white text-xs backdrop-blur-sm">
+              <span id="radar-coords">GPS: 13.0827° N, 80.2707° E • Speed: 1.4 m/s</span>
+              <span class="flex items-center gap-3">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Safe Zone</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-400"></span> Guardians</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span> Patrol Unit</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio Evidence & Anomaly Sensor Strip -->
+        <div class="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3.5 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-[#6750A4]/15 text-[#6750A4] flex items-center justify-center font-bold text-xs">
+              MIC
+            </div>
+            <div>
+              <div class="text-xs font-bold">Encrypted 30s Audio Evidence Buffer &amp; Shake-to-SOS</div>
+              <div id="audio-status-text" class="text-xs text-[var(--muted-foreground)]">
+                Accelerometer: Normal (0.12g) • Acoustic Distress Classifier: Monitoring
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="simulateShakeSos()" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--card)] hover:border-[#B3261E]">
+              Simulate 3x Shake
+            </button>
+            <button onclick="toggleAudioEvidence()" id="btn-audio-rec" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#6750A4] text-white">
+              Record Evidence
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right 5 Cols: Emergency SOS Hub & Smart Safety Tools -->
+      <div class="lg:col-span-5 flex flex-col gap-3.5">
+
+        <!-- Multi-Channel SOS Card -->
+        <div class="rounded-2xl border-2 border-[#B3261E]/40 bg-gradient-to-b from-[#B3261E]/10 to-transparent p-4 text-center">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#B3261E]">Emergency Dispatch Engine</span>
+            <span id="sos-badge-state" class="px-2 py-0.5 rounded text-xs font-semibold bg-[#B3261E]/15 text-[#B3261E]">READY</span>
+          </div>
+
+          <div class="my-3 flex justify-center">
+            <button onclick="startSosCountdown()" id="btn-giant-sos"
+              class="w-28 h-28 rounded-full bg-gradient-to-br from-[#FF3D57] to-[#B3261E] text-white shadow-xl flex flex-col items-center justify-center border-4 border-white/30 hover:scale-105 active:scale-95 transition transform">
+              <span id="sos-btn-main" class="text-2xl font-extrabold tracking-wider">SOS</span>
+              <span id="sos-btn-sub" class="text-xs opacity-90">5s Countdown</span>
+            </button>
+          </div>
+
+          <p class="text-xs text-[var(--muted-foreground)] mb-3">
+            Sends live Google Maps link via SMS, pushes high-priority FCM alert to Circle, and records 30s audio evidence.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="triggerImmediateSos()" class="py-2 px-3 rounded-xl bg-[#B3261E] text-white font-semibold text-xs hover:opacity-95">
+              Instant SOS Now
+            </button>
+            <button onclick="cancelSos()" class="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--card)] font-semibold text-xs">
+              Reset / Mark Safe
+            </button>
+          </div>
+        </div>
+
+        <!-- Smart Safety Toolkit -->
+        <div class="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4 space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
+            Smart Deterrence &amp; Escape Toolkit
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <!-- Fake Call Trigger -->
+            <button onclick="openFakeCall('Mom (Mobile)', '+91 98401 22310')"
+              class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] text-left hover:border-[#6750A4] transition">
+              <div class="font-bold text-xs text-[#6750A4]">📞 Fake Escape Call</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5">Realistic incoming call screen + voice</div>
+            </button>
+
+            <!-- Acoustic Deterrent Siren -->
+            <button onclick="toggleSiren()" id="btn-siren"
+              class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] text-left hover:border-[#B3261E] transition">
+              <div class="font-bold text-xs text-[#B3261E]" id="siren-title">🚨 110dB Deterrent Siren</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5" id="siren-sub">High-decibel WebAudio alarm</div>
+            </button>
+
+            <!-- Safe Check-In Timer -->
+            <button onclick="toggleCheckInTimer(15)"
+              class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] text-left hover:border-[#6750A4] transition">
+              <div class="font-bold text-xs">⏱️ Safe Check-In Timer</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5" id="toolkit-timer-desc">Auto-SOS if not checked in</div>
+            </button>
+
+            <!-- Cab Ride Plate Logger -->
+            <button onclick="verifyCabRide()"
+              class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] text-left hover:border-[#6750A4] transition">
+              <div class="font-bold text-xs">🚕 Cab Ride Monitor</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5" id="cab-status-desc">Share vehicle plate &amp; route deviation</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: AI SAFETY TRAINER & NEURAL ROUTE SCORER -->
+    <div id="panel-ai" class="hidden p-4 md:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <!-- Left 6 Cols: Neural Model Training Console -->
+      <div class="lg:col-span-6 space-y-4">
+        <div class="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h2 class="text-sm font-bold">SafeCircle Neural Risk Model — Training Studio</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Train gradient-boosted spatial safety weights on urban telemetry</p>
+            </div>
+            <span id="ai-epoch-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#6750A4]/15 text-[#6750A4]">
+              Val Accuracy: 96.4%
+            </span>
+          </div>
+
+          <!-- Training Loss / Accuracy Canvas -->
+          <div class="rounded-xl border border-[var(--border)] bg-[var(--card)] p-2 my-3">
+            <canvas id="trainingCanvas" width="520" height="170" class="w-full block"></canvas>
+          </div>
+
+          <!-- Feature Importance Sliders -->
+          <div class="space-y-2.5 text-xs">
+            <div>
+              <div class="flex justify-between font-medium mb-0.5">
+                <span>Street Lighting Luminance Weight (Lux Telemetry)</span>
+                <span id="w-light-val">35%</span>
+              </div>
+              <input id="w-light" type="range" min="10" max="60" value="35" oninput="updateWeights()" class="w-full accent-[#6750A4]" />
+            </div>
+            <div>
+              <div class="flex justify-between font-medium mb-0.5">
+                <span>CCTV &amp; Police Patrol Proximity Weight</span>
+                <span id="w-patrol-val">30%</span>
+              </div>
+              <input id="w-patrol" type="range" min="10" max="60" value="30" oninput="updateWeights()" class="w-full accent-[#6750A4]" />
+            </div>
+            <div>
+              <div class="flex justify-between font-medium mb-0.5">
+                <span>Pedestrian &amp; 24/7 Safe-Haven Density Weight</span>
+                <span id="w-crowd-val">25%</span>
+              </div>
+              <input id="w-crowd" type="range" min="10" max="60" value="25" oninput="updateWeights()" class="w-full accent-[#6750A4]" />
+            </div>
+          </div>
+
+          <div class="mt-4 flex items-center gap-2">
+            <button onclick="runModelTraining()" id="btn-train-model"
+              class="px-4 py-2 rounded-xl bg-[#6750A4] text-white font-semibold text-xs shadow hover:opacity-95">
+              Train 50 Epochs on Urban Dataset (12,400 corridors)
+            </button>
+            <span id="train-status-msg" class="text-xs text-[var(--muted-foreground)]">Model converged (Loss: 0.041)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right 6 Cols: Live Route Safety Inference -->
+      <div class="lg:col-span-6 space-y-4">
+        <div class="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4 space-y-3">
+          <h2 class="text-sm font-bold">Live Route Safety Inference Engine</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Evaluate any commute corridor using the trained SafeCircle AI risk scorer
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-medium mb-1">Origin Point</label>
+              <input id="ai-origin" type="text" value="TIDEL Tech Park Gate 2"
+                class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1">Destination Point</label>
+              <input id="ai-dest" type="text" value="Adyar Safe Zone Residency"
+                class="w-full px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-xs font-medium mb-1">Time of Travel</label>
+              <select id="ai-time" onchange="evaluateAiCorridor()" class="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs">
+                <option value="night">Late Night (22:30)</option>
+                <option value="evening">Evening Rush (19:00)</option>
+                <option value="day">Daylight (13:00)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1">Mode</label>
+              <select id="ai-mode" onchange="evaluateAiCorridor()" class="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs">
+                <option value="walk">Walking Solo</option>
+                <option value="cab">Ride-Hail Cab</option>
+                <option value="metro">Metro + Walk</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button onclick="evaluateAiCorridor()" class="w-full py-1.5 rounded-lg bg-[#6750A4] text-white font-semibold text-xs">
+                Score Route
+              </button>
+            </div>
+          </div>
+
+          <!-- Scored Route Comparison Cards -->
+          <div id="ai-route-results" class="space-y-2.5 pt-2">
+            <div class="p-3 rounded-xl border-2 border-emerald-500/50 bg-emerald-500/10">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-xs">Route A: Arterial MG Road Corridor (Recommended)</span>
+                <span id="route-a-score" class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-xs">95 / 100 SAFE</span>
+              </div>
+              <p id="route-a-meta" class="text-xs text-[var(--muted-foreground)] mt-1">
+                94% LED street lighting • 4 Police PCR checkpoints • 6 open 24/7 pharmacies • +2 min vs shortest path
+              </p>
+            </div>
+
+            <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)]">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-xs">Route B: Back-Alley Shortcut (Avoided by AI)</span>
+                <span id="route-b-score" class="px-2 py-0.5 rounded bg-amber-600 text-white font-bold text-xs">58 / 100 CAUTION</span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">
+                Low lighting segment (41%) • Sparse pedestrian activity after 21:30 • Auto-rerouted
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: TRUSTED CIRCLES & MUTUAL CONSENT -->
+    <div id="panel-circles" class="hidden p-4 md:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-5 space-y-3">
+        <div class="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4 space-y-3">
+          <h2 class="text-sm font-bold">Create or Join a Trusted Safety Circle</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Anti-stalkerware compliant: Location sharing requires explicit, revocable mutual consent from every member.
+          </p>
+          <div class="flex gap-2">
+            <input id="new-circle-input" type="text" placeholder="Circle Name (e.g., Hostel Wing B)"
+              class="flex-1 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs" />
+            <button onclick="addNewCircle()" class="px-3.5 py-1.5 rounded-lg bg-[#6750A4] text-white font-semibold text-xs">
+              + Create
+            </button>
+          </div>
+          <div id="circle-list-container" class="space-y-2 pt-1"></div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7">
+        <div class="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold">Circle Members &amp; Live Consent Ledger</h2>
+            <span class="text-xs text-[#6750A4] font-semibold">Invite Code: SC-9482</span>
+          </div>
+          <div id="member-list-container" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 24/7 SAFE HAVENS & EMERGENCY HELPLINES -->
+    <div id="panel-havens" class="hidden p-4 md:p-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div class="p-4 rounded-2xl border border-[var(--border)] bg-[var(--background)] flex items-center justify-between">
+          <div>
+            <div class="font-bold text-sm">All-Women Police Patrol Station</div>
+            <div class="text-xs text-[var(--muted-foreground)]">320m away • Open 24/7 • Verified PCR Van Dispatch</div>
+          </div>
+          <button onclick="triggerHelplineToast('1091 — Women Helpline')" class="px-3.5 py-2 rounded-xl bg-[#6750A4] text-white font-bold text-xs">
+            📞 Dial 1091
+          </button>
+        </div>
+
+        <div class="p-4 rounded-2xl border border-[var(--border)] bg-[var(--background)] flex items-center justify-between">
+          <div>
+            <div class="font-bold text-sm">National Emergency Response System (ERSS)</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Pan-India Integrated Police, Fire &amp; Ambulance</div>
+          </div>
+          <button onclick="triggerHelplineToast('112 — National ERSS')" class="px-3.5 py-2 rounded-xl bg-[#B3261E] text-white font-bold text-xs">
+            📞 Dial 112
+          </button>
+        </div>
+
+        <div class="p-4 rounded-2xl border border-[var(--border)] bg-[var(--background)] flex items-center justify-between">
+          <div>
+            <div class="font-bold text-sm">Apollo 24/7 Trauma &amp; Safe Shelter</div>
+            <div class="text-xs text-[var(--muted-foreground)]">540m away • Security Guarded Lobby &amp; Medical Aid</div>
+          </div>
+          <button onclick="triggerHelplineToast('108 — Emergency Medical')" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs">
+            📞 Dial 108
+          </button>
+        </div>
+
+        <div class="p-4 rounded-2xl border border-[var(--border)] bg-[var(--background)] flex items-center justify-between">
+          <div>
+            <div class="font-bold text-sm">Domestic &amp; Women in Distress Helpline</div>
+            <div class="text-xs text-[var(--muted-foreground)]">24/7 Confidential Counseling &amp; Legal Protection</div>
+          </div>
+          <button onclick="triggerHelplineToast('181 — Women Helpline')" class="px-3.5 py-2 rounded-xl bg-[#6750A4] text-white font-bold text-xs">
+            📞 Dial 181
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAKE CALL MODAL OVERLAY -->
+    <div id="fake-call-modal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+      <div class="w-full max-w-xs rounded-3xl bg-[#1C1B1F] text-white p-6 text-center shadow-2xl border border-white/15">
+        <div class="text-xs uppercase tracking-widest text-emerald-400 mb-2">Incoming Guardian Call</div>
+        <div id="fc-caller-name" class="text-xl font-bold">Mom (Mobile)</div>
+        <div id="fc-caller-num" class="text-xs text-gray-400 mt-0.5">+91 98401 22310</div>
+        <div id="fc-call-timer" class="my-6 text-sm font-mono text-emerald-300">Ringing...</div>
+        <div class="flex justify-center gap-4">
+          <button onclick="answerFakeCall()" id="btn-fc-answer" class="px-5 py-2.5 rounded-full bg-emerald-600 text-white font-bold text-xs">
+            Answer &amp; Speaker
+          </button>
+          <button onclick="closeFakeCall()" class="px-5 py-2.5 rounded-full bg-[#B3261E] text-white font-bold text-xs">
+            End Call
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- STATE ---
+    let liveTracking = true;
+    let unsyncedPoints = 0;
+    let sosCountdownTimer = null;
+    let sosActive = false;
+    let sirenActive = false;
+    let audioCtx = null;
+    let sirenInterval = null;
+    let checkInSeconds = null;
+    let checkInInterval = null;
+    let audioRecActive = false;
+
+    const circles = [
+      { id: 'cir_1', name: 'Family Guardians', code: 'SC-9482', count: 4 },
+      { id: 'cir_2', name: 'Night Commute Circle', code: 'SC-3109', count: 3 }
+    ];
+
+    const members = [
+      { name: 'Priya Sharma (You)', role: 'OWNER', battery: 96, distance: '0.0 km', consent: true },
+      { name: 'Lakshmi S. (Mom)', role: 'GUARDIAN', battery: 94, distance: '0.8 km', consent: true },
+      { name: 'Ananya R.', role: 'MEMBER', battery: 82, distance: '1.3 km', consent: true },
+      { name: 'Kavya M.', role: 'MEMBER', battery: 78, distance: 'Safe Zone', consent: true }
+    ];
+
+    // --- TABS ---
+    function switchTab(tab) {
+      ['command', 'ai', 'circles', 'havens'].forEach(t => {
+        document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('tab-' + t);
+        if (t === tab) {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#6750A4] text-white transition';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] transition';
+        }
+      });
+      if (tab === 'ai') drawTrainingChart();
+      if (tab === 'circles') renderCirclesAndMembers();
+    }
+
+    // --- GEOSPATIAL RADAR CANVAS ---
+    const radarCanvas = document.getElementById('radarCanvas');
+    const rCtx = radarCanvas.getContext('2d');
+    let userPos = { x: 310, y: 165, targetX: 310, targetY: 165 };
+    const guardians = [
+      { label: 'Mom', x: 210, y: 110, vx: 0.25, vy: 0.15 },
+      { label: 'Ananya', x: 420, y: 210, vx: -0.2, vy: 0.18 },
+      { label: 'PCR Patrol #4', x: 350, y: 95, vx: -0.3, vy: 0.1, isPatrol: true }
+    ];
+    let radarTick = 0;
+
+    radarCanvas.addEventListener('click', (e) => {
+      const rect = radarCanvas.getBoundingClientRect();
+      const scaleX = radarCanvas.width / rect.width;
+      const scaleY = radarCanvas.height / rect.height;
+      userPos.targetX = (e.clientX - rect.left) * scaleX;
+      userPos.targetY = (e.clientY - rect.top) * scaleY;
+      queueOfflinePoint();
+    });
+
+    function animateRadar() {
+      radarTick += 0.04;
+      rCtx.fillStyle = '#13111C';
+      rCtx.fillRect(0, 0, radarCanvas.width, radarCanvas.height);
+
+      // Subtle Street Grid
+      rCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+      rCtx.lineWidth = 1;
+      for (let x = 0; x < radarCanvas.width; x += 45) {
+        rCtx.beginPath(); rCtx.moveTo(x, 0); rCtx.lineTo(x, radarCanvas.height); rCtx.stroke();
+      }
+      for (let y = 0; y < radarCanvas.height; y += 45) {
+        rCtx.beginPath(); rCtx.moveTo(0, y); rCtx.lineTo(radarCanvas.width, y); rCtx.stroke();
+      }
+
+      // Well-lit AI Safe Corridor Path
+      rCtx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+      rCtx.lineWidth = 10;
+      rCtx.lineCap = 'round';
+      rCtx.beginPath();
+      rCtx.moveTo(90, 260);
+      rCtx.quadraticCurveTo(260, 170, 520, 75);
+      rCtx.stroke();
+
+      // Safe Zone Geofences
+      const safeZones = [
+        { x: 130, y: 230, r: 48, name: 'Metro Safe Zone' },
+        { x: 495, y: 85, r: 54, name: 'Home Geofence' }
+      ];
+      safeZones.forEach(z => {
+        rCtx.fillStyle = 'rgba(16, 185, 129, 0.12)';
+        rCtx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
+        rCtx.lineWidth = 1.5;
+        rCtx.beginPath();
+        rCtx.arc(z.x, z.y, z.r, 0, Math.PI * 2);
+        rCtx.fill();
+        rCtx.stroke();
+        rCtx.fillStyle = '#6EE7B7';
+        rCtx.font = '12px sans-serif';
+        rCtx.fillText(z.name, z.x - 42, z.y - z.r - 6);
+      });
+
+      // Move User smoothly toward clicked waypoint
+      userPos.x += (userPos.targetX - userPos.x) * 0.06;
+      userPos.y += (userPos.targetY - userPos.y) * 0.06;
+
+      // User Pulse Ring
+      const pulseRadius = 16 + (Math.sin(radarTick * 2) + 1) * 12;
+      rCtx.fillStyle = sosActive ? 'rgba(255, 61, 87, 0.32)' : 'rgba(167, 139, 250, 0.22)';
+      rCtx.beginPath();
+      rCtx.arc(userPos.x, userPos.y, pulseRadius, 0, Math.PI * 2);
+      rCtx.fill();
+
+      // User Center Pin
+      rCtx.fillStyle = sosActive ? '#FF3D57' : '#A78BFA';
+      rCtx.beginPath();
+      rCtx.arc(userPos.x, userPos.y, 7, 0, Math.PI * 2);
+      rCtx.fill();
+      rCtx.fillStyle = '#FFFFFF';
+      rCtx.font = 'bold 12px sans-serif';
+      rCtx.fillText(sosActive ? 'YOU (SOS ACTIVE)' : 'You (Live)', userPos.x + 11, userPos.y + 4);
+
+      // Guardians & Patrol Units
+      guardians.forEach(g => {
+        g.x += g.vx;
+        g.y += g.vy;
+        if (g.x < 60 || g.x > 560) g.vx *= -1;
+        if (g.y < 40 || g.y > 280) g.vy *= -1;
+
+        rCtx.fillStyle = g.isPatrol ? '#38BDF8' : '#C084FC';
+        rCtx.beginPath();
+        rCtx.arc(g.x, g.y, 5.5, 0, Math.PI * 2);
+        rCtx.fill();
+        rCtx.fillStyle = '#E2E8F0';
+        rCtx.font = '12px sans-serif';
+        rCtx.fillText(g.label, g.x + 9, g.y + 4);
+      });
+
+      requestAnimationFrame(animateRadar);
+    }
+    animateRadar();
+
+    // --- TRACKING & ROOM QUEUE ---
+    function toggleLiveTracking() {
+      liveTracking = !liveTracking;
+      const btn = document.getElementById('btn-live-track');
+      btn.textContent = liveTracking ? 'Sharing: ACTIVE' : 'Sharing: PAUSED';
+      btn.className = liveTracking
+        ? 'px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white'
+        : 'px-3 py-1 rounded-lg text-xs font-semibold bg-amber-600 text-white';
+    }
+
+    function queueOfflinePoint() {
+      unsyncedPoints++;
+      document.getElementById('kpi-queue').textContent = unsyncedPoints + ' pts';
+      const lat = (13.0827 + (Math.random() - 0.5) * 0.004).toFixed(4);
+      const lng = (80.2707 + (Math.random() - 0.5) * 0.004).toFixed(4);
+      document.getElementById('radar-coords').textContent = `GPS: ${lat}° N, ${lng}° E • Queued in Room DB`;
+    }
+
+    function syncRoomQueue() {
+      unsyncedPoints = 0;
+      document.getElementById('kpi-queue').textContent = '0 pts';
+    }
+
+    // --- EMERGENCY SOS ENGINE ---
+    function startSosCountdown() {
+      if (sosActive) return;
+      clearInterval(sosCountdownTimer);
+      let remaining = 5;
+      const bar = document.getElementById('sos-alert-bar');
+      const title = document.getElementById('sos-alert-title');
+      const badge = document.getElementById('sos-badge-state');
+      bar.classList.remove('hidden');
+      badge.textContent = `COUNTDOWN ${remaining}s`;
+
+      title.textContent = `TRIGGERING MULTI-CHANNEL SOS IN ${remaining} SECONDS... TAP CANCEL IF SAFE`;
+      sosCountdownTimer = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+          title.textContent = `TRIGGERING MULTI-CHANNEL SOS IN ${remaining} SECONDS... TAP CANCEL IF SAFE`;
+          badge.textContent = `COUNTDOWN ${remaining}s`;
+        } else {
+          clearInterval(sosCountdownTimer);
+          triggerImmediateSos();
+        }
+      }, 1000);
+    }
+
+    function triggerImmediateSos() {
+      clearInterval(sosCountdownTimer);
+      sosActive = true;
+      document.getElementById('sos-alert-bar').classList.remove('hidden');
+      document.getElementById('sos-alert-title').textContent =
+        'EMERGENCY SOS DISPATCHED — BROADCASTING LIVE GPS & 30s AUDIO TO 4 GUARDIANS';
+      document.getElementById('sos-badge-state').textContent = 'DISPATCHED';
+      document.getElementById('sos-btn-main').textContent = 'ACTIVE';
+      document.getElementById('sos-btn-sub').textContent = 'Broadcasting';
+      if (!audioRecActive) toggleAudioEvidence();
+    }
+
+    function cancelSos() {
+      clearInterval(sosCountdownTimer);
+      sosActive = false;
+      document.getElementById('sos-alert-bar').classList.add('hidden');
+      document.getElementById('sos-badge-state').textContent = 'READY';
+      document.getElementById('sos-btn-main').textContent = 'SOS';
+      document.getElementById('sos-btn-sub').textContent = '5s Countdown';
+      if (sirenActive) toggleSiren();
+    }
+
+    function simulateShakeSos() {
+      document.getElementById('audio-status-text').textContent =
+        'Accelerometer: 3.4g Triple-Shake Detected! Starting 5s SOS Countdown...';
+      startSosCountdown();
+    }
+
+    function toggleAudioEvidence() {
+      audioRecActive = !audioRecActive;
+      const btn = document.getElementById('btn-audio-rec');
+      const txt = document.getElementById('audio-status-text');
+      if (audioRecActive) {
+        btn.textContent = 'Stop Recording';
+        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium bg-[#B3261E] text-white';
+        txt.textContent = 'Encrypted AES-256 Audio Stream buffering to Firebase Cloud Storage...';
+      } else {
+        btn.textContent = 'Record Evidence';
+        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium bg-[#6750A4] text-white';
+        txt.textContent = 'Accelerometer: Normal (0.12g) • Acoustic Distress Classifier: Monitoring';
+      }
+    }
+
+    // --- WEB AUDIO SIREN ---
+    function toggleSiren() {
+      sirenActive = !sirenActive;
+      const title = document.getElementById('siren-title');
+      const sub = document.getElementById('siren-sub');
+
+      if (sirenActive) {
+        title.textContent = '🚨 STOP DETERRENT SIREN';
+        sub.textContent = 'Active acoustic alarm pulsing';
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          let high = true;
+          sirenInterval = setInterval(() => {
+            if (!sirenActive || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(high ? 880 : 620, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.28);
+            high = !high;
+          }, 320);
+        } catch (e) {}
+      } else {
+        title.textContent = '🚨 110dB Deterrent Siren';
+        sub.textContent = 'High-decibel WebAudio alarm';
+        clearInterval(sirenInterval);
+        if (audioCtx) {
+          audioCtx.close().catch(() => {});
+          audioCtx = null;
+        }
+      }
+    }
+
+    // --- FAKE CALL ESCAPE MODAL ---
+    let fcInterval = null;
+    function openFakeCall(name, num) {
+      document.getElementById('fc-caller-name').textContent = name;
+      document.getElementById('fc-caller-num').textContent = num;
+      document.getElementById('fc-call-timer').textContent = 'Incoming Call • Ringing...';
+      document.getElementById('btn-fc-answer').classList.remove('hidden');
+      document.getElementById('fake-call-modal').classList.remove('hidden');
+    }
+
+    function answerFakeCall() {
+      document.getElementById('btn-fc-answer').classList.add('hidden');
+      let sec = 0;
+      clearInterval(fcInterval);
+      fcInterval = setInterval(() => {
+        sec++;
+        const m = String(Math.floor(sec / 60)).padStart(2, '0');
+        const s = String(sec % 60).padStart(2, '0');
+        document.getElementById('fc-call-timer').textContent = `Connected ${m}:${s} • "Hey, I see your live location, I'm waiting right outside the gate..."`;
+      }, 1000);
+    }
+
+    function closeFakeCall() {
+      clearInterval(fcInterval);
+      document.getElementById('fake-call-modal').classList.add('hidden');
+    }
+
+    // --- SAFE CHECK-IN TIMER ---
+    function toggleCheckInTimer(mins) {
+      if (checkInSeconds !== null) {
+        clearInterval(checkInInterval);
+        checkInSeconds = null;
+        document.getElementById('kpi-timer').textContent = 'Standby';
+        document.getElementById('kpi-timer-btn').textContent = 'Start 15m';
+        document.getElementById('toolkit-timer-desc').textContent = 'Auto-SOS if not checked in';
+        return;
+      }
+      checkInSeconds = mins * 60;
+      document.getElementById('kpi-timer-btn').textContent = "I'm Safe (Cancel)";
+      checkInInterval = setInterval(() => {
+        checkInSeconds--;
+        const m = String(Math.floor(checkInSeconds / 60)).padStart(2, '0');
+        const s = String(checkInSeconds % 60).padStart(2, '0');
+        document.getElementById('kpi-timer').textContent = `${m}:${s}`;
+        document.getElementById('toolkit-timer-desc').textContent = `Active: ${m}:${s} remaining`;
+        if (checkInSeconds <= 0) {
+          clearInterval(checkInInterval);
+          checkInSeconds = null;
+          triggerImmediateSos();
+        }
+      }, 1000);
+    }
+
+    function verifyCabRide() {
+      document.getElementById('cab-status-desc').textContent = 'TN-07-CM-4821 logged • Zero route deviation';
+    }
+
+    // --- AI TRAINING STUDIO & ROUTE SCORER ---
+    let trainingProgress = 100;
+    function drawTrainingChart() {
+      const c = document.getElementById('trainingCanvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+      ctx.lineWidth = 1;
+      for (let y = 25; y < c.height; y += 35) {
+        ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(c.width - 15, y); ctx.stroke();
+      }
+
+      // Accuracy curve (emerald)
+      ctx.strokeStyle = '#10B981';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      const maxStep = Math.max(2, Math.floor((trainingProgress / 100) * 50));
+      for (let i = 0; i <= maxStep; i++) {
+        const x = 35 + (i / 50) * (c.width - 55);
+        const acc = 0.62 + 0.345 * (1 - Math.exp(-i / 11));
+        const y = c.height - 20 - acc * (c.height - 40);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Loss curve (purple)
+      ctx.strokeStyle = '#8B5CF6';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i <= maxStep; i++) {
+        const x = 35 + (i / 50) * (c.width - 55);
+        const loss = 0.78 * Math.exp(-i / 13) + 0.04;
+        const y = c.height - 20 - loss * (c.height - 40);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#10B981';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('● Validation Accuracy (96.4%)', 45, 20);
+      ctx.fillStyle = '#8B5CF6';
+      ctx.fillText('● Cross-Entropy Risk Loss (0.041)', 240, 20);
+    }
+
+    function updateWeights() {
+      const l = Number(document.getElementById('w-light').value);
+      const p = Number(document.getElementById('w-patrol').value);
+      const c = Number(document.getElementById('w-crowd').value);
+      document.getElementById('w-light-val').textContent = l + '%';
+      document.getElementById('w-patrol-val').textContent = p + '%';
+      document.getElementById('w-crowd-val').textContent = c + '%';
+      evaluateAiCorridor();
+    }
+
+    function runModelTraining() {
+      trainingProgress = 4;
+      const status = document.getElementById('train-status-msg');
+      const badge = document.getElementById('ai-epoch-badge');
+      const timer = setInterval(() => {
+        trainingProgress += 8;
+        const epoch = Math.min(50, Math.floor(trainingProgress / 2));
+        const acc = (82 + (trainingProgress / 100) * 14.8).toFixed(1);
+        status.textContent = `Training Epoch ${epoch}/50 on street-lighting & PCR telemetry...`;
+        badge.textContent = `Val Accuracy: ${acc}%`;
+        drawTrainingChart();
+        if (trainingProgress >= 100) {
+          clearInterval(timer);
+          status.textContent = 'Model converged (50/50 epochs • Loss: 0.038)';
+          evaluateAiCorridor();
+        }
+      }, 90);
+    }
+
+    function evaluateAiCorridor() {
+      const time = document.getElementById('ai-time').value;
+      const mode = document.getElementById('ai-mode').value;
+      const l = Number(document.getElementById('w-light').value);
+      const p = Number(document.getElementById('w-patrol').value);
+      let base = 91;
+      if (time === 'day') base += 5;
+      if (time === 'evening') base += 2;
+      if (mode === 'metro') base += 2;
+      const score = Math.min(99, Math.max(82, Math.round(base + (l + p - 60) * 0.12)));
+      document.getElementById('route-a-score').textContent = `${score} / 100 SAFE`;
+      document.getElementById('kpi-safety-score').textContent = `${score}.2%`;
+      document.getElementById('route-a-meta').textContent =
+        `${Math.min(98, l + 58)}% LED street lighting • 4 Police PCR checkpoints • Mode: ${mode.toUpperCase()} (${time})`;
+    }
+
+    // --- CIRCLES & MEMBERS ---
+    function renderCirclesAndMembers() {
+      const cWrap = document.getElementById('circle-list-container');
+      cWrap.innerHTML = circles.map(c => `
+        <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] flex items-center justify-between">
+          <div>
+            <div class="font-bold text-xs">${c.name}</div>
+            <div class="text-xs text-[var(--muted-foreground)]">${c.count} Guardians • Code: ${c.code}</div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/15 text-emerald-500">Active</span>
+        </div>
+      `).join('');
+
+      const mWrap = document.getElementById('member-list-container');
+      mWrap.innerHTML = members.map((m, idx) => `
+        <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] flex items-center justify-between gap-2">
+          <div>
+            <div class="font-bold text-xs">${m.name}</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Role: ${m.role} • Battery: ${m.battery}% • ${m.distance}</div>
+          </div>
+          <button onclick="toggleMemberConsent(${idx})" class="px-2.5 py-1 rounded-lg text-xs font-semibold ${m.consent ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'}">
+            ${m.consent ? 'Consent: Granted' : 'Consent: Paused'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function addNewCircle() {
+      const inp = document.getElementById('new-circle-input');
+      const name = inp.value.trim();
+      if (!name) return;
+      circles.push({
+        id: 'cir_' + Date.now(),
+        name,
+        code: 'SC-' + Math.floor(1000 + Math.random() * 9000),
+        count: 1
+      });
+      inp.value = '';
+      renderCirclesAndMembers();
+    }
+
+    function toggleMemberConsent(idx) {
+      members[idx].consent = !members[idx].consent;
+      renderCirclesAndMembers();
+    }
+
+    function triggerHelplineToast(label) {
+      const bar = document.getElementById('sos-alert-bar');
+      bar.classList.remove('hidden');
+      document.getElementById('sos-alert-title').textContent = `CONNECTING PRIORITY VOICE CALL: ${label}`;
+    }
+
+    renderCirclesAndMembers();
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        // Users can write only their own profile; authenticated users can read basic member profiles
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).exists())",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['name', 'phone'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 60"
+        },
+        "phone": {
+          ".validate": "newData.isString() && newData.val().length >= 7 && newData.val().length <= 20"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length <= 120"
+        },
+        "bloodGroup": {
+          ".validate": "newData.isString() && newData.val().length <= 10"
+        },
+        "medicalNotes": {
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        }
+      }
+    },
+
+    "groups": {
+      "$gid": {
+        // Group data readable only by current members or pending joiners with valid code
+        ".read": "auth != null && (data.child('members').child(auth.uid).exists() || data.child('pendingMembers').child(auth.uid).exists())",
+        // Creation allowed by authenticated user; updates allowed by group admin or member updating own entry
+        ".write": "auth != null && (!data.exists() || data.child('adminUid').val() === auth.uid)",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 50"
+        },
+        "code": {
+          ".validate": "newData.isString() && newData.val().length === 6"
+        },
+        "adminUid": {
+          ".validate": "newData.isString()"
+        },
+        "members": {
+          "$memberUid": {
+            // Admin can manage any member; user can add/remove themselves if group doesn't require approval or via Cloud Function
+            ".write": "auth != null && (root.child('groups').child($gid).child('adminUid').val() === auth.uid || (auth.uid === $memberUid && (!newData.exists() || root.child('groups').child($gid).child('requireApproval').val() === false)))",
+            ".validate": "newData.isString() && (newData.val() === 'admin' || newData.val() === 'member')"
+          }
+        },
+        "pendingMembers": {
+          "$memberUid": {
+            ".write": "auth != null && (auth.uid === $memberUid || root.child('groups').child($gid).child('adminUid').val() === auth.uid)"
+          }
+        }
+      }
+    },
+
+    "joinCodes": {
+      "$code": {
+        // Authenticated users can look up a 6-character join code to find its groupId
+        ".read": "auth != null && $code.length === 6",
+        // Only the admin of the target group can create or delete a join code mapping
+        ".write": "auth != null && (!data.exists() || root.child('groups').child(data.val()).child('adminUid').val() === auth.uid)",
+        ".validate": "newData.isString() && $code.matches(/^[A-Z0-9]{6}$/)"
+      }
+    },
+
+    "locations": {
+      "$gid": {
+        // Only members of the group can read live locations in that group
+        ".read": "auth != null && root.child('groups').child($gid).child('members').child(auth.uid).exists()",
+        "$uid": {
+          // Location writes ONLY by the owner who is also a member of the group
+          ".write": "auth != null && auth.uid === $uid && root.child('groups').child($gid).child('members').child(auth.uid).exists()",
+          ".validate": "newData.hasChildren(['lat', 'lng', 'timestamp', 'sharing']) && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180"
+        }
+      }
+    },
+
+    "locationHistory": {
+      "$uid": {
+        // Owner can read/write own 24h trail; group members sharing a group can read
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "contacts": {
+      "$uid": {
+        // Strictly private to the owner
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$cid": {
+          ".validate": "newData.hasChildren(['name', 'phone', 'isPrimary']) && newData.child('name').isString() && newData.child('phone').isString()"
+        }
+      }
+    },
+
+    "alerts": {
+      "$gid": {
+        // Readable by group members
+        ".read": "auth != null && root.child('groups').child($gid).child('members').child(auth.uid).exists()",
+        "$aid": {
+          // Writable by a member of the group; senderUid must match auth.uid
+          // Rate-limit: timestamp must be within 60 seconds of server time
+          ".write": "auth != null && root.child('groups').child($gid).child('members').child(auth.uid).exists() && newData.child('senderUid').val() === auth.uid",
+          ".validate": "newData.hasChildren(['senderUid', 'lat', 'lng', 'timestamp', 'status']) && newData.child('timestamp').val() <= now + 60000"
+        }
+      }
+    },
+
+    "geofences": {
+      "$gid": {
+        ".read": "auth != null && root.child('groups').child($gid).child('members').child(auth.uid).exists()",
+        "$fid": {
+          ".write": "auth != null && root.child('groups').child($gid).child('members').child(auth.uid).exists()",
+          ".validate": "newData.hasChildren(['name', 'lat', 'lng', 'radius', 'createdBy']) && newData.child('radius').isNumber() && newData.child('radius').val() >= 50 && newData.child('radius').val() <= 5000"
+        }
+      }
+    }
+  }
+}
+

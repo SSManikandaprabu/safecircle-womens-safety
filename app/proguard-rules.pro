@@ -1,0 +1,3 @@
+-keep class com.safecircle.app.data.model.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*
